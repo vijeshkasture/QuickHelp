@@ -1,41 +1,40 @@
+# Dependencies
+node_modules/
+**/node_modules/
+bun.lockb
+
+# Build & Output
+dist/
+**/dist/
+build/
+**/build/
+
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
-*.pyo
-*.pyd
-*.so
-.Python
-venv/
+*$py.class
 .venv/
-ENV/
+venv/
 env/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
 
-# Local environment and secrets
-.env
-.env.*
-*.pem
-*.key
-backend/firebase-credentials.json
-
-# Local databases
+# Database
 *.db
 *.sqlite3
 kaamsetu.db
 
-# Editor / OS files
-.vscode/
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+firebase-credentials.json
+*.pem
+*.key
+
+# IDE, OS & Scratch
+scratch/
 .idea/
+.vscode/
 .DS_Store
 Thumbs.db
-
-# Test and coverage
-.coverage
-htmlcov/
-
-# Build artifacts
-build/
-dist/
-*.egg-info/
+*.log

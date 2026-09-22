@@ -1,0 +1,6 @@
+{
+  "name": "QuickHelp - Hyperlocal Services",
+  "description": "Hyperlocal on-demand neighborhood service marketplace connecting households with verified local technicians for instant repairs, pricing benchmarks, and dispatch.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
