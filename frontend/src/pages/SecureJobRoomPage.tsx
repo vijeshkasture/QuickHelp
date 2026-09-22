@@ -274,7 +274,7 @@ export const SecureJobRoomPage: React.FC<SecureJobRoomPageProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#f2f3ff] pb-5">
           <div>
             <span className="px-2.5 py-0.5 bg-[#f2f3ff] text-[#12345b] text-[11px] font-bold rounded-full uppercase">
-              {job.serviceCategory} • Verified Escrow
+              {job.serviceCategory} • Cash / Direct UPI on Delivery
             </span>
             <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f] mt-1.5">
               {job.serviceTitle}
@@ -285,15 +285,31 @@ export const SecureJobRoomPage: React.FC<SecureJobRoomPageProps> = ({
           </div>
 
           <div className="text-left sm:text-right">
-            <span className="text-xs text-[#74777f] uppercase font-semibold block">
-              Guaranteed Fee
-            </span>
-            <span className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-[#006c4c]">
-              ₹{job.guaranteedPayout || job.offeredPrice}
-            </span>
-            <span className="text-[11px] text-[#007351] block font-medium">
-              Fair benchmark pricing
-            </span>
+            {isCustomer ? (
+              <>
+                <span className="text-xs text-[#74777f] uppercase font-semibold block">
+                  Direct Cash/UPI to Worker
+                </span>
+                <span className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-[#006c4c]">
+                  ₹{job.offeredPrice}
+                </span>
+                <span className="text-[11px] text-[#006c4c] block font-bold">
+                  0% Customer Platform Fee
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-[#74777f] uppercase font-semibold block">
+                  Collect Cash from Customer
+                </span>
+                <span className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-[#001f3f]">
+                  ₹{job.offeredPrice}
+                </span>
+                <span className="text-[11px] text-[#006c4c] block font-semibold">
+                  Net (90%): ₹{Math.round(job.offeredPrice * 0.9)} • App Fee (10%): ₹{Math.round(job.offeredPrice * 0.1)}
+                </span>
+              </>
+            )}
           </div>
         </div>
 

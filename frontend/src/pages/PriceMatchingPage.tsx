@@ -210,10 +210,10 @@ export const PriceMatchingPage: React.FC<PriceMatchingPageProps> = ({
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="font-['Inter'] text-xs font-semibold text-[#0d1b36]">
-                  Offered Service Fee (Held in Escrow)
+                  Offered Service Fee (Cash on Delivery / Direct UPI to Worker)
                 </label>
-                <span className="text-[11px] text-[#006c4c] font-semibold">
-                  Zero commission
+                <span className="text-[11px] text-[#006c4c] font-bold bg-[#7bfac4]/30 px-2 py-0.5 rounded-full">
+                  0% Customer Platform Fee
                 </span>
               </div>
               <div className="flex items-center justify-between p-3.5 bg-[#f2f3ff] rounded-2xl border border-[#e1e9e5]/60">
@@ -238,9 +238,14 @@ export const PriceMatchingPage: React.FC<PriceMatchingPageProps> = ({
                     +
                   </button>
                 </div>
-                <span className="text-xs text-[#43474e]">
-                  Released after satisfied completion
-                </span>
+                <div className="text-right">
+                  <span className="text-xs text-[#006c4c] font-semibold block">
+                    Direct Cash / UPI to Worker
+                  </span>
+                  <span className="text-[10px] text-[#74777f] block">
+                    No online payment to app
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -14,10 +14,17 @@ export const WorkerHistoryPage: React.FC<WorkerHistoryPageProps> = ({ currentUse
   const [worker, setWorker] = useState<UserAccount>(currentUser);
   const { recentSchedule } = getWorkerData(worker);
 
-  const totalEarned = recentSchedule.reduce((acc, curr) => {
-    const num = parseInt(curr.amount.replace(/\D/g, ''), 10);
-    return acc + (isNaN(num) ? 0 : num);
-  }, 0);
+  const totalGrossCollected = recentSchedule.reduce((acc, curr) => acc + (curr.grossAmount || 0), 0);
+  const netTakeHome = recentSchedule.reduce((acc, curr) => acc + (curr.netAmount || Math.round(curr.grossAmount * 0.9)), 0);
+  const totalCommissionOwed = recentSchedule.reduce((acc, curr) => acc + (curr.commission || Math.round(curr.grossAmount * 0.1)), 0);
+
+  const handleSettleCommission = () => {
+    if (totalCommissionOwed === 0) {
+      alert('You have ₹0 pending platform commission dues.');
+      return;
+    }
+    alert(`Initiating UPI payment of ₹${totalCommissionOwed} for QuickHelp 10% platform commission.`);
+  };
 
   return (
     <div className="min-h-screen bg-[#faf8ff] flex">
@@ -30,10 +37,10 @@ export const WorkerHistoryPage: React.FC<WorkerHistoryPageProps> = ({ currentUse
           <div className="flex items-center justify-between">
             <div>
               <h1 className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f]">
-                Job History & Wallet Payouts
+                Job History & Wallet Commission Ledger
               </h1>
               <p className="font-['Inter'] text-xs text-[#43474e] mt-0.5">
-                All settled dispatches are deposited directly with zero platform deductions
+                Customers pay 100% Cash/UPI directly to you on site. 10% platform commission is tracked here.
               </p>
             </div>
             <Link
@@ -44,27 +51,56 @@ export const WorkerHistoryPage: React.FC<WorkerHistoryPageProps> = ({ currentUse
             </Link>
           </div>
 
-          {/* Wallet Balance Summary Card */}
-          <div className="bg-[#12345b] text-white p-6 sm:p-8 rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div>
-              <span className="text-xs uppercase tracking-wider text-[#7bfac4] font-bold">
-                Available Wallet Balance
+          {/* 3-Part Wallet & Commission Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* 1. Gross Cash Collected */}
+            <div className="bg-[#12345b] text-white p-6 rounded-3xl shadow-sm space-y-2">
+              <span className="text-xs uppercase tracking-wider text-[#d9e2ff] font-bold block">
+                Total Cash Collected (100%)
               </span>
-              <div className="font-['Plus_Jakarta_Sans'] font-bold text-3xl sm:text-4xl text-white mt-1">
-                ₹{totalEarned > 0 ? `${totalEarned.toLocaleString('en-IN')}.00` : '0.00'}
+              <div className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-white">
+                ₹{totalGrossCollected.toLocaleString('en-IN')}
               </div>
-              <span className="text-xs text-[#d9e2ff] mt-1 block">
-                Next automatic bank transfer: Tomorrow morning
-              </span>
+              <p className="text-[11px] text-[#d9e2ff]/80">
+                Direct cash/UPI collected on site from customer
+              </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => alert('Withdrawal request of full balance initiated to your registered UPI ID.')}
-              className="px-6 py-3 bg-[#7bfac4] hover:bg-[#5ddda9] text-[#002114] font-['Inter'] font-bold text-xs rounded-xl shadow-md transition-all self-start sm:self-auto"
-            >
-              Instant UPI Payout
-            </button>
+            {/* 2. Net Take-Home Earnings (90%) */}
+            <div className="bg-[#ffffff] p-6 rounded-3xl shadow-sm border border-[#006c4c]/30 space-y-2">
+              <span className="text-xs uppercase tracking-wider text-[#006c4c] font-bold block">
+                Net Take-Home (90%)
+              </span>
+              <div className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-[#006c4c]">
+                ₹{netTakeHome.toLocaleString('en-IN')}
+              </div>
+              <p className="text-[11px] text-[#43474e]">
+                Your net income after 10% app commission
+              </p>
+            </div>
+
+            {/* 3. Platform Commission Payable (10%) */}
+            <div className="bg-[#ffffff] p-6 rounded-3xl shadow-sm border border-[#ba1a1a]/20 space-y-2 flex flex-col justify-between">
+              <div>
+                <span className="text-xs uppercase tracking-wider text-[#ba1a1a] font-bold block">
+                  App Commission Due (10%)
+                </span>
+                <div className="font-['Plus_Jakarta_Sans'] font-bold text-3xl text-[#ba1a1a] mt-1">
+                  ₹{totalCommissionOwed.toLocaleString('en-IN')}
+                </div>
+                <p className="text-[11px] text-[#74777f] mt-0.5">
+                  10% service fee owed to QuickHelp
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSettleCommission}
+                className="w-full py-2.5 bg-[#ba1a1a] hover:bg-[#93000a] text-white font-['Inter'] font-bold text-xs rounded-xl shadow-xs transition-all mt-2"
+              >
+                Settle 10% Commission (UPI)
+              </button>
+            </div>
           </div>
 
           {/* Schedule List */}
@@ -79,10 +115,10 @@ export const WorkerHistoryPage: React.FC<WorkerHistoryPageProps> = ({ currentUse
                   <Link
                     key={item.id}
                     to={`/jobs/${item.id}`}
-                    className="p-4 bg-[#f2f3ff] rounded-2xl flex items-center justify-between border border-[#e1e9e5]/60 hover:bg-[#e9edff] transition-colors group block"
+                    className="p-4 bg-[#f2f3ff] rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[#e1e9e5]/60 hover:bg-[#e9edff] transition-colors group block"
                   >
                     <div className="flex items-center gap-3.5">
-                      <div className="w-10 h-10 rounded-xl bg-[#e9edff] group-hover:bg-[#12345b] text-[#12345b] group-hover:text-white flex items-center justify-center transition-colors">
+                      <div className="w-10 h-10 rounded-xl bg-[#e9edff] group-hover:bg-[#12345b] text-[#12345b] group-hover:text-white flex items-center justify-center transition-colors shrink-0">
                         <span className="material-symbols-outlined text-[20px]">
                           {item.icon}
                         </span>
@@ -97,11 +133,16 @@ export const WorkerHistoryPage: React.FC<WorkerHistoryPageProps> = ({ currentUse
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <span className="font-['Plus_Jakarta_Sans'] font-bold text-base text-[#006c4c] block">
-                        {item.amount}
-                      </span>
-                      <span className="text-[10px] text-[#007351] font-semibold bg-[#7bfac4]/30 px-2 py-0.5 rounded-full">
+                    <div className="text-left sm:text-right flex sm:flex-col items-center sm:items-end justify-between gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#e1e9e5]/50">
+                      <div>
+                        <span className="font-['Plus_Jakarta_Sans'] font-bold text-base text-[#001f3f] block">
+                          Cash Collected: {item.amount}
+                        </span>
+                        <span className="text-[11px] text-[#006c4c] font-medium block">
+                          Net: ₹{item.netAmount} • 10% App Fee: ₹{item.commission}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-[#007351] font-semibold bg-[#7bfac4]/30 px-2 py-0.5 rounded-full whitespace-nowrap">
                         {item.status} →
                       </span>
                     </div>

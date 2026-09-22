@@ -73,6 +73,12 @@ export interface Job {
   cancellationReason?: string;
   cancelledBy?: UserRole;
   attachedPhotoUrl?: string;
+
+  // 10% Commission & 0% Customer Fee Model
+  customerPlatformFee?: number; // Always 0
+  paymentMode?: string; // 'Cash on Delivery / Direct UPI'
+  workerCommission?: number; // 10% app commission
+  workerNetEarnings?: number; // 90% net take-home
 }
 
 export interface ChatMessage {

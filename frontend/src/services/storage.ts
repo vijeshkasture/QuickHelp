@@ -12,6 +12,9 @@ export interface WorkerScheduleItem {
   title: string;
   location: string;
   amount: string;
+  grossAmount: number;
+  netAmount: number;
+  commission: number;
   icon: string;
   status: string;
 }
@@ -376,6 +379,10 @@ export function createCustomerRequest(params: {
   const uniqueId = `QHP-${Math.floor(100000 + Math.random() * 900000)}`;
   const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
 
+  const offered = params.offeredPrice || 500;
+  const commission = Math.round(offered * 0.10);
+  const netEarnings = Math.round(offered * 0.90);
+
   const newJob: Job = {
     id: uniqueId,
     serviceCategory: params.serviceCategory,
@@ -394,9 +401,13 @@ export function createCustomerRequest(params: {
     workerRating: worker.rating || 5.0,
     workerTrade: worker.primaryTrade || params.serviceCategory,
     status: 'pending',
-    benchmarkPrice: params.benchmarkPrice || params.offeredPrice || 500,
-    offeredPrice: params.offeredPrice || 500,
-    guaranteedPayout: params.offeredPrice || 500,
+    benchmarkPrice: params.benchmarkPrice || offered,
+    offeredPrice: offered,
+    guaranteedPayout: offered,
+    customerPlatformFee: 0,
+    paymentMode: 'Cash on Delivery (Direct to Worker)',
+    workerCommission: commission,
+    workerNetEarnings: netEarnings,
     distanceKm: params.distanceKm || '1.8 km',
     transitTime: params.transitTime || '~12 min',
     otp,
@@ -863,14 +874,22 @@ export function getWorkerRequests(workerId: string): {
     ) || null;
 
   const completed = allJobs.filter((j) => j.status === 'completed');
-  const recentSchedule: WorkerScheduleItem[] = completed.map((j) => ({
-    id: j.id,
-    title: j.serviceTitle,
-    location: `${j.neighborhood || 'Local Area'} · ${j.completedDate || 'Recent'}`,
-    amount: `₹${j.guaranteedPayout || j.offeredPrice}`,
-    icon: 'construction',
-    status: 'Settled',
-  }));
+  const recentSchedule: WorkerScheduleItem[] = completed.map((j) => {
+    const gross = j.offeredPrice || j.guaranteedPayout || 0;
+    const comm = j.workerCommission || Math.round(gross * 0.10);
+    const net = j.workerNetEarnings || Math.round(gross * 0.90);
+    return {
+      id: j.id,
+      title: j.serviceTitle,
+      location: `${j.neighborhood || 'Local Area'} · ${j.completedDate || 'Recent'}`,
+      amount: `₹${gross}`,
+      grossAmount: gross,
+      netAmount: net,
+      commission: comm,
+      icon: 'construction',
+      status: 'Cash Collected',
+    };
+  });
 
   return { pendingRequests, activeJob, recentSchedule };
 }
