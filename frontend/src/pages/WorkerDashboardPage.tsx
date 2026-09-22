@@ -273,10 +273,10 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardProps> = ({
                 Acceptance Rate
               </span>
               <div className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f]">
-                {worker.acceptanceRate || 91}%
+                {worker.acceptanceRate !== undefined ? worker.acceptanceRate : (recentSchedule.length > 0 ? 100 : 0)}%
               </div>
               <span className="text-[11px] text-[#006c4c] font-semibold">
-                ✓ Target achieved (&gt;85%)
+                {recentSchedule.length > 0 ? '✓ Verified Partner' : 'No dispatches yet'}
               </span>
             </div>
 
@@ -285,10 +285,10 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardProps> = ({
                 On-Time Arrival
               </span>
               <div className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f]">
-                {worker.onTimeArrival || 97}%
+                {worker.onTimeArrival !== undefined ? worker.onTimeArrival : (recentSchedule.length > 0 ? 100 : 0)}%
               </div>
               <span className="text-[11px] text-[#006c4c] font-semibold">
-                Avg. 11m travel time
+                {recentSchedule.length > 0 ? 'Avg. 11m travel time' : 'Ready for dispatch'}
               </span>
             </div>
 
@@ -297,7 +297,7 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardProps> = ({
                 Completed Jobs
               </span>
               <div className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f]">
-                {worker.completedJobsCount || 127}
+                {worker.completedJobsCount || recentSchedule.length || 0}
               </div>
               <span className="text-[11px] text-[#12345b] font-semibold">
                 All-time verified jobs
@@ -309,10 +309,10 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardProps> = ({
                 Reliability Score
               </span>
               <div className="font-['Plus_Jakarta_Sans'] font-bold text-2xl text-[#001f3f]">
-                {worker.reliabilityScore || 94}%
+                {worker.reliabilityScore !== undefined ? worker.reliabilityScore : 100}%
               </div>
               <span className="text-[11px] text-[#006c4c] font-semibold">
-                Top 5% in Freeganj Ward
+                Verified Technician
               </span>
             </div>
           </div>
@@ -321,48 +321,57 @@ export const WorkerDashboardPage: React.FC<WorkerDashboardProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Left 7 Cols: 7-Day Velocity Bar Chart */}
             <div className="lg:col-span-7 bg-[#ffffff] p-6 rounded-3xl border border-[#e1e9e5]/80 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-['Plus_Jakarta_Sans'] font-bold text-base text-[#001f3f]">
-                    7-Day Earning Velocity
-                  </h3>
-                  <p className="font-['Inter'] text-xs text-[#74777f]">
-                    Weekly direct payout volume
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span className="font-['Plus_Jakarta_Sans'] font-bold text-xl text-[#006c4c]">
-                    ₹6,900
-                  </span>
-                  <span className="block text-[10px] text-[#74777f]">This Week</span>
-                </div>
-              </div>
+              {(() => {
+                const totalEarnedNum = recentSchedule.reduce((acc, curr) => {
+                  const num = parseInt(curr.amount.replace(/\D/g, ''), 10);
+                  return acc + (isNaN(num) ? 0 : num);
+                }, 0);
 
-              {/* Bar Chart Representation */}
-              <div className="grid grid-cols-7 gap-2 items-end h-40 pt-4 border-b border-[#f2f3ff] pb-2">
-                {[
-                  { day: 'Mon', amount: 600, height: '40%' },
-                  { day: 'Tue', amount: 400, height: '28%' },
-                  { day: 'Wed', amount: 1200, height: '70%' },
-                  { day: 'Thu', amount: 950, height: '55%' },
-                  { day: 'Fri', amount: 1500, height: '85%' },
-                  { day: 'Sat', amount: 1800, height: '100%' },
-                  { day: 'Sun', amount: 450, height: '30%' },
-                ].map((item) => (
-                  <div key={item.day} className="flex flex-col items-center gap-1.5 h-full justify-end group">
-                    <span className="text-[10px] font-mono text-[#74777f] opacity-0 group-hover:opacity-100 transition-opacity">
-                      ₹{item.amount}
-                    </span>
-                    <div
-                      className="w-full bg-[#e9edff] group-hover:bg-[#006c4c] rounded-t-lg transition-colors"
-                      style={{ height: item.height }}
-                    />
-                    <span className="text-[11px] font-medium text-[#43474e]">
-                      {item.day}
-                    </span>
-                  </div>
-                ))}
-              </div>
+                const maxEarned = totalEarnedNum > 0 ? totalEarnedNum : 1;
+
+                return (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-['Plus_Jakarta_Sans'] font-bold text-base text-[#001f3f]">
+                          7-Day Earning Velocity
+                        </h3>
+                        <p className="font-['Inter'] text-xs text-[#74777f]">
+                          Weekly direct payout volume
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <span className="font-['Plus_Jakarta_Sans'] font-bold text-xl text-[#006c4c]">
+                          ₹{totalEarnedNum.toLocaleString('en-IN')}
+                        </span>
+                        <span className="block text-[10px] text-[#74777f]">This Week</span>
+                      </div>
+                    </div>
+
+                    {/* Bar Chart Representation */}
+                    <div className="grid grid-cols-7 gap-2 items-end h-40 pt-4 border-b border-[#f2f3ff] pb-2">
+                      {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
+                        const dayEarned = totalEarnedNum > 0 ? Math.round(totalEarnedNum / 7) : 0;
+                        const heightPct = totalEarnedNum > 0 ? Math.max(15, Math.min(100, (dayEarned / maxEarned) * 100)) : 0;
+                        return (
+                          <div key={day} className="flex flex-col items-center gap-1.5 h-full justify-end group">
+                            <span className="text-[10px] font-mono text-[#74777f] opacity-0 group-hover:opacity-100 transition-opacity">
+                              ₹{dayEarned}
+                            </span>
+                            <div
+                              className="w-full bg-[#e9edff] group-hover:bg-[#006c4c] rounded-t-lg transition-colors"
+                              style={{ height: `${heightPct}%` }}
+                            />
+                            <span className="text-[11px] font-medium text-[#43474e]">
+                              {day}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Right 5 Cols: Recent Completed Schedule */}

@@ -119,7 +119,12 @@ export const CustomerDashboardPage: React.FC<CustomerDashboardProps> = ({
                 {getGreeting()}, {currentUser.fullName.split(' ')[0]}
               </h1>
               <p className="font-['Inter'] text-sm text-[#43474e] mt-0.5">
-                4 verified technicians are available in your immediate neighborhood right now
+                {(() => {
+                  const count = (typeof localStorage !== 'undefined') ? JSON.parse(localStorage.getItem('quickhelp_registered_users') || '[]').filter((u: any) => u.role === 'worker' || !!u.primaryTrade).length : 0;
+                  return count > 0
+                    ? `${count} verified technician${count === 1 ? '' : 's'} available in your immediate neighborhood right now`
+                    : 'Verified technicians standing by for on-demand dispatch in your area';
+                })()}
               </p>
             </div>
 
